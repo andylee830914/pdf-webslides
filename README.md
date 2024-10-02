@@ -1,6 +1,6 @@
 # PDF Web Slides 
 
-This is a fork of [pdf-webslides](https://github.com/misc0110/pdf-webslides). This version is transplanted to use revel.js instead of the original HTML5 slides.
+This is a fork of [pdf-webslides](https://github.com/misc0110/pdf-webslides). This version is transplanted to use [reveal.js](https://github.com/hakimel/reveal.js) instead of the original HTML5 slides.
 
 ## Usage
 
