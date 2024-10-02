@@ -168,3 +168,18 @@ void append_elem(char **orig, const char *append, const char *split) {
     *orig = appended;
   }
 }
+
+void strip_ext(char *fname)
+{
+  char *end = fname + strlen(fname);
+
+  while (end > fname && *end != '.')
+  {
+    --end;
+  }
+
+  if (end > fname)
+  {
+    *end = '\0';
+  }
+}

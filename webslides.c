@@ -52,9 +52,7 @@ void winsystem(const char* app, char* arg) {
 // ---------------------------------------------------------------------------
 static getopt_arg_t cli_options[] = {
     {"single", no_argument, NULL, 's', "Create a single file", NULL},
-    {"presenter", no_argument, NULL, 'p', "Start in presenter mode", NULL},
     {"output", required_argument, NULL, 'o', "Output file name", "FILENAME"},
-    {"disablenotes", no_argument, NULL, 'n', "Do not include notes", NULL},
     {"compress", required_argument, NULL, 'c', "Use an SVG compressor (e.g., svgcleaner)", "BINARY"},
     {"version", no_argument, NULL, 'v', "Show version", NULL},
     {"help", no_argument, NULL, 'h', "Show this help.", NULL},
@@ -86,8 +84,6 @@ int convert(PopplerPage *page, const char *fname, SlideInfo *info) {
   cairo_t *img;
   double width, height;
   char *comm = calloc(1024, 1);
-  char fname_prev[256];
-  snprintf(fname_prev, 256, "%s.prev.png", fname);
 
   poppler_page_get_size(page, &width, &height);
   surface = cairo_svg_surface_create(fname, width, height);
@@ -156,7 +152,6 @@ int convert(PopplerPage *page, const char *fname, SlideInfo *info) {
   poppler_page_free_link_mapping(link_list);
 
   cairo_show_page(img);
-  create_thumbnail(page, fname_prev, width, height);
   
   cairo_destroy(img);
   cairo_surface_destroy(surface);
@@ -173,9 +168,8 @@ void progress_cb(int slide) {
 void extract_slide(PopplerDocument *pdffile, int p, SlideInfo *info,
                    Options *options) {
   PopplerPage *page;
-  char fname[64], fname_c[64], fname_p[128];
+  char fname[64], fname_c[64];
   sprintf(fname, "slide-%d.svg", p);
-  sprintf(fname_p, "%s.prev.png", fname);
   page = poppler_document_get_page(pdffile, p);
   convert(page, fname, &(info[p]));
   if (options->nonotes) {
@@ -203,9 +197,7 @@ void extract_slide(PopplerDocument *pdffile, int p, SlideInfo *info,
   char *b64 = encode_file_base64(fname_c);
 #endif
   info[p].slide = b64;
-  info[p].thumb = encode_file_base64(fname_p);
   unlink(fname);
-  unlink(fname_p);
   if (options->compress) {
       unlink(fname_c);
   }
@@ -213,7 +205,7 @@ void extract_slide(PopplerDocument *pdffile, int p, SlideInfo *info,
 
 // ---------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
-  Options options = {.single = 0, .presenter = 0, .nonotes = 0, .name = NULL, .compress = NULL};
+  Options options = {.single = 0, .name = NULL, .compress = NULL};
   PopplerDocument *pdffile;
   char abspath[PATH_MAX];
   char fname_uri[PATH_MAX + 32];
@@ -251,9 +243,14 @@ int main(int argc, char *argv[]) {
   int pages = poppler_document_get_n_pages(pdffile);
   printf_color(1, TAG_OK "Loaded %d slides\n", pages);
 
+  char *fname1;
+  fname1 = g_path_get_basename(fname_uri);
+  strip_ext(fname1);
+
   char fname[1024];
   snprintf(fname, sizeof(fname), "%s.html",
-           options.name ? options.name : "index");
+           options.name ? options.name : fname1);
+  
   FILE *output = fopen(fname, "w");
   if (!output) {
     printf_color(1,
@@ -262,22 +259,10 @@ int main(int argc, char *argv[]) {
   }
   printf_color(1, TAG_INFO "Converting slides...\n");
 
-  progress_start(1, (pages + 1) * 6 - 1, NULL);
+  progress_start(1, (pages + 1) * 2 - 1, NULL);
 
   char *template = strdup((char*)index_html_template); //read_file("index.html.template");
 
-  char* img_black = encode_array_base64((char *)black_svg, black_svg_len);
-  char* img_freeze = encode_array_base64((char *)freeze_svg, freeze_svg_len);
-  char* img_open = encode_array_base64((char *)open_svg, open_svg_len);
-  template = replace_string_first(
-      template, "{{black.svg}}", img_black);
-  template = replace_string_first(
-      template, "{{freeze.svg}}", img_freeze);
-  template =
-      replace_string_first(template, "{{open.svg}}", img_open);
-  free(img_black);
-  free(img_freeze);
-  free(img_open);
   SlideInfo info[pages + 1];
   memset(info, 0, sizeof(info));
 
@@ -286,37 +271,23 @@ int main(int argc, char *argv[]) {
     extract_slide(pdffile, p, info, &options);
   }
 
-  info[pages].annotations = strdup("");
   info[pages].slide = strdup("");
-  info[pages].videos = strdup("");
-  info[pages].thumb = strdup("");
-  info[pages].videos_pos = strdup("");
 
-  char *video_pos_data = encode_array(info, 4, pages + 1, 0, progress_cb);
-  char *thumb_data = encode_array(info, 3, pages + 1, 0, progress_cb);
   char *slide_data = encode_array(info, 2, pages + 1, 0, progress_cb);
-  char *video_data = encode_array(info, 1, pages + 1, 1, progress_cb);
-  char *annot_data = encode_array(info, 0, pages + 1, 1, progress_cb);
 
   if (options.single) {
+    template = replace_string_first(template, "{{filename}}", fname1);
     template = replace_string_first(template, "{{script}}",
                                     "<script type='text/javascript'>\n"
                                     "var slide_info = {"
-                                    "'slides': {{slides}},\n"
-                                    "'videos': {{videos}},\n"
-                                    "'videos_pos': {{videos_pos}},\n"
-                                    "'annotations': {{annotations}},\n"
-                                    "'thumb': {{thumb}}\n"
+                                    "'slides': {{slides}}\n"
                                     "};\n"
                                     "</script>");
 
     template = replace_string_first(template, "{{slides}}", slide_data);
-    template = replace_string_first(template, "{{videos}}", video_data);
-    template = replace_string_first(template, "{{videos_pos}}", video_pos_data);
-    template = replace_string_first(template, "{{annotations}}", annot_data);
-    template = replace_string_first(template, "{{thumb}}", thumb_data);
   } else {
     char include[1024];
+    template = replace_string_first(template, "{{filename}}", fname1);
     snprintf(include, sizeof(include),
              "<script type='text/javascript' src='%s.js'></script>\n",
              options.name ? options.name : "slides");
@@ -325,14 +296,10 @@ int main(int argc, char *argv[]) {
              options.name ? options.name : "slides");
     FILE *f = fopen(include, "w");
     fprintf(f,
-            "var slide_info = {'slides': %s,\n'videos': %s,\n'videos_pos': %s,\n'annotations': "
-            "%s\n, 'thumb': %s\n};\n",
-            slide_data, video_data, video_pos_data, annot_data, thumb_data);
+            "var slide_info = {'slides': %s\n};\n",
+            slide_data);
     fclose(f);
   }
-
-  template = replace_string_first(template, "{{presenter}}",
-                                  options.presenter ? "true" : "false");
 
   fwrite(template, strlen(template), 1, output);
   fclose(output);
@@ -340,19 +307,10 @@ int main(int argc, char *argv[]) {
   printf_color(1, TAG_OK "Done!\n");
   
   for (int p = 0; p <= pages; p++) {
-    free(info[p].annotations);
     free(info[p].slide);
-    free(info[p].videos);
-    free(info[p].thumb);
-    free(info[p].videos_pos);
   }
   free(template);
-    
-  free(video_pos_data);
-  free(video_data);
-  free(thumb_data);
   free(slide_data);
-  free(annot_data);
 
   return 0;
 }

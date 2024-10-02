@@ -18,5 +18,5 @@ char* encode_array(SlideInfo* info, int offset, int len, int b64,
 char* encode_array_base64(char* array, size_t len);
 
 void append_elem(char **orig, const char *append, const char *split);
-
+void strip_ext(char *fname);
 #endif
