@@ -1,0 +1,9 @@
+dist/*
+.vscode/*
+._.DS_Store
+.DS_Store
+*.deb
+*.o
+res_gen.c
+resconv
+pdf-webslides
