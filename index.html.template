@@ -7,15 +7,9 @@
 
 	<title>{{filename}}</title>
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css"
-		integrity="sha512-Mjxkx+r7O/OLQeKeIBCQ2yspG1P5muhAtv/J+p2/aPnSenciZWm5Wlnt+NOUNA4SHbnBIE/R2ic0ZBiCXdQNUg=="
-		crossorigin="anonymous" referrerpolicy="no-referrer" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css"
-		integrity="sha512-1vDOkqtCXgcn0zgLIrxVjSIHvXOB/Ho2k33zwIDMqStDdHWvQyVU+BGG2fK4nnOgDbg0jEzVqzTYTL65orMyWw=="
-		crossorigin="anonymous" referrerpolicy="no-referrer" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css"
-		integrity="sha512-Nrw40ThKwvPSYyxg6x099eplkB9p5cs2DtorDFSdpapXZlBOJDKK1Hn/gAaYuDQuas6yZJAEG2p2pYQtH80N/w=="
-		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reset.min.css" integrity="sha512-Mjxkx+r7O/OLQeKeIBCQ2yspG1P5muhAtv/J+p2/aPnSenciZWm5Wlnt+NOUNA4SHbnBIE/R2ic0ZBiCXdQNUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css" integrity="sha512-0AUO8B5ll9y1ERV/55xq3HeccBGnvAJQsVGitNac/iQCLyDTGLUBMPqlupIWp/rJg0hV3WWHusXchEIdqFAv1Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/black.min.css" integrity="sha512-B1sAcZ4KSpvbIUUvxaoqy56z88d6fozQyEV54K0gVBUMDMcVu9CAXMwJ5wTWo650j3IQH6yDEETiek6lrk/zCw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
@@ -25,9 +19,8 @@
 		</div>
 	</div>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.js"
-		integrity="sha512-2hNT29g1D19n9CTY54193u4EzqLqEA+qiwqsxx+LwiCxaVhGC9zzeFlvDTmHqSCxaabTxON9BxBE4tJOaMZ+iQ=="
-		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.js" integrity="sha512-35L3EFHQcGaTZ6QN9wAg9iK1hTPVCn8RGsscuXjm5JdmDRyOw+/IWJ4wavGkozQ8VDoddD7nV1psHgu/BYNpxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js" integrity="sha512-tDzEYXTFwGOO3tWp8oTV3yGeZ4lG4gUt+tJFQTsP7W4jV/MJ1Rgr6m9aICicjh/ymL5GD6jkHXDi9cHKfctFGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	{{script}}
 	<script>
 		// More info about initialization & config:
@@ -48,7 +41,8 @@
 			}
 			Reveal.initialize({
 				hash: true,
-				backgroundTransition: 'none'
+				backgroundTransition: 'none',
+				plugins: [RevealNotes],
 			});
 		});
 
