@@ -7,3 +7,6 @@ dist/*
 res_gen.c
 resconv
 pdf-webslides
+._res_gen.c
+._resconv
+._pdf-webslides
