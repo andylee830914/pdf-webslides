@@ -23,7 +23,16 @@ On Ubuntu, the dependencies can be installed through
     
 Then, the tool can be built by running
 
-    make deb
-    dpkg -i dist/pdf-webslides_0.4_amd64.deb
+    make install
     
 to install the tool as `pdf-webslides`.
+
+#### macOS
+
+On macOS, the dependencies can be installed through Homebrew
+
+    brew install poppler cairo
+    
+Then, the tool can be built by running
+
+    make install
