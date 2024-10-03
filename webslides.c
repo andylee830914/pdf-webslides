@@ -16,7 +16,7 @@
 #include "res.h"
 #include "utils.h"
 
-#if defined(__linux__) || defined(__linux) || defined(__unix__) || defined(LINUX) || defined(UNIX)
+#if defined(__linux__) || defined(__linux) || defined(__unix__) || defined(LINUX) || defined(UNIX) || defined(__APPLE__)
 #define LINUX
 #endif
 #if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__) || defined(__CYGWIN__)

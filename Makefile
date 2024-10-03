@@ -2,11 +2,15 @@ VERSION = $(shell cat VERSION)
 CFLAGS += -g -Wall -DAPP_VERSION="\"$(VERSION)\"" -Wno-address-of-packed-member -Wextra
 LDFLAGS +=
 CC ?= gcc
+PROGRAM = pdf-webslides
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+INSTALL_BIN = $(BINDIR)/$(PROGRAM)
 
-all: pdf-webslides
+all: $(PROGRAM)
 
-pdf-webslides: webslides.o cli.o utils.o res.o
-	$(CC) webslides.o cli.o utils.o res.o $(LDFLAGS) -o pdf-webslides `pkg-config --libs poppler-glib`
+$(PROGRAM): webslides.o cli.o utils.o res.o
+	$(CC) webslides.o cli.o utils.o res.o $(LDFLAGS) -o $(PROGRAM) `pkg-config --libs poppler-glib`
 
 webslides.o: webslides.c
 	$(CC) webslides.c -c $(CFLAGS) `pkg-config --cflags --static poppler-glib`
@@ -24,8 +28,12 @@ res.o: resconv res.c index.html.template
 resconv: resconv.c
 	$(CC) resconv.c -o resconv
 
-deb: pdf-webslides
+deb: $(PROGRAM)
 	fakeroot -u ./makedeb.sh
+
+install: $(PROGRAM)
+	install -d $(BINDIR)
+	install -m 755 $(PROGRAM) $(INSTALL_BIN)
 	
 clean:
 	rm -f *.o *.deb pdf-webslides resconv	
