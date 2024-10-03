@@ -14,7 +14,24 @@ The output is an `index.html` file and a corresponding `slides.js` in the curren
 
 ### Presenter Mode
 
-`reveal.js` has a presenter mode that can be used to show the current slide, the next slide, and the notes for the current slide. To use this mode, open the slides in a browser and press the `s` key. This will open a new window with the presenter view.
+`reveal.js` has a presenter mode that can be used to display the current slide, the next slide, and the notes for the current slide. To use this mode, provide the `-p` option, i.e.,
+
+    pdf-webslides -p <pdf file>
+
+Then, open the slides in a browser and press the `s` key. This will open a new window with the presenter view.
+
+### Notes
+
+The tool supports the showing notes in presenter mode. Hence, they can also be directly embedded in LaTeX beamer.
+With the following macro
+
+    \newcommand<>{\pnote}[1]{\only#2{\tikz[remember picture,overlay]{\node{\pdfmargincomment[opacity=0]{#1}}}}}
+
+notes can be added to a certain animation-step of a slide by adding something like
+
+    \pnote<1>{Speaker note for step 1 of the current slide.}
+    
+If there are notes in the PDF, they are shown below the preview of the next slide.
 
 ## Installation
 

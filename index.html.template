@@ -27,22 +27,27 @@
 		// - https://revealjs.com/initialization/
 		// - https://revealjs.com/config/
 		document.addEventListener("DOMContentLoaded", function (event) {
-			function addSlide(content = '') {
+			function addSlide(content = '', annote = '') {
 				dom = {},
 					dom.slides = document.querySelector('.reveal .slides');
 				var newSlide = document.createElement('section');
 				newSlide.setAttribute('data-background-image', content);
 				newSlide.setAttribute('data-background-size', 'contain');
+				
+				var newAnnote = document.createElement('aside');
+				newAnnote.setAttribute('class', 'notes');
+				newAnnote.innerHTML = atob(annote).replace(/(?:\r\n|\r|\n)/g, '<br>');
+				newSlide.appendChild(newAnnote);
 				dom.slides.appendChild(newSlide);
 			};
 			var slide_img = slide_info["slides"];
 			for (var i = 0; i < slide_img.length - 1; i++) {
-				addSlide("data:image/svg+xml;base64," + slide_img[i]);
+				addSlide("data:image/svg+xml;base64," + slide_img[i], slide_info["annotations"][i]);
 			}
 			Reveal.initialize({
 				hash: true,
 				backgroundTransition: 'none',
-				plugins: [RevealNotes],
+				plugins: [{{plugins}}],
 			});
 		});
 

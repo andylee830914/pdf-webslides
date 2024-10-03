@@ -52,7 +52,9 @@ void winsystem(const char* app, char* arg) {
 // ---------------------------------------------------------------------------
 static getopt_arg_t cli_options[] = {
     {"single", no_argument, NULL, 's', "Create a single file", NULL},
+    {"presenter", no_argument, NULL, 'p', "Enable reveal.js presenter mode", NULL},
     {"output", required_argument, NULL, 'o', "Output file name", "FILENAME"},
+    {"disablenotes", no_argument, NULL, 'n', "Do not include notes", NULL},
     {"compress", required_argument, NULL, 'c', "Use an SVG compressor (e.g., svgcleaner)", "BINARY"},
     {"version", no_argument, NULL, 'v', "Show version", NULL},
     {"help", no_argument, NULL, 'h', "Show this help.", NULL},
@@ -173,7 +175,6 @@ void extract_slide(PopplerDocument *pdffile, int p, SlideInfo *info,
   page = poppler_document_get_page(pdffile, p);
   convert(page, fname, &(info[p]));
   if (options->nonotes) {
-    free(info[p].annotations);
     info[p].annotations = "";
   }
   if (options->compress) {
@@ -205,7 +206,7 @@ void extract_slide(PopplerDocument *pdffile, int p, SlideInfo *info,
 
 // ---------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
-  Options options = {.single = 0, .name = NULL, .compress = NULL};
+  Options options = {.single = 0, .presenter = 0, .nonotes = 0, .name = NULL, .compress = NULL};
   PopplerDocument *pdffile;
   char abspath[PATH_MAX];
   char fname_uri[PATH_MAX + 32];
@@ -259,7 +260,7 @@ int main(int argc, char *argv[]) {
   }
   printf_color(1, TAG_INFO "Converting slides...\n");
 
-  progress_start(1, (pages + 1) * 2 - 1, NULL);
+  progress_start(1, (pages + 1) * 3 - 1, NULL);
 
   char *template = strdup((char*)index_html_template); //read_file("index.html.template");
 
@@ -272,19 +273,23 @@ int main(int argc, char *argv[]) {
   }
 
   info[pages].slide = strdup("");
+  info[pages].annotations = strdup("");
 
   char *slide_data = encode_array(info, 2, pages + 1, 0, progress_cb);
+  char *annot_data = encode_array(info, 0, pages + 1, 1, progress_cb);
 
   if (options.single) {
     template = replace_string_first(template, "{{filename}}", fname1);
     template = replace_string_first(template, "{{script}}",
                                     "<script type='text/javascript'>\n"
                                     "var slide_info = {"
-                                    "'slides': {{slides}}\n"
+                                    "'slides': {{slides}},\n"
+                                    "'annotations': {{annotations}},\n"
                                     "};\n"
                                     "</script>");
 
     template = replace_string_first(template, "{{slides}}", slide_data);
+    template = replace_string_first(template, "{{annotations}}", annot_data);
   } else {
     char include[1024];
     template = replace_string_first(template, "{{filename}}", fname1);
@@ -296,10 +301,13 @@ int main(int argc, char *argv[]) {
              options.name ? options.name : "slides");
     FILE *f = fopen(include, "w");
     fprintf(f,
-            "var slide_info = {'slides': %s\n};\n",
-            slide_data);
+            "var slide_info = {'slides': %s\n, 'annotations':%s\n};\n",
+            slide_data,annot_data);
     fclose(f);
   }
+
+  template = replace_string_first(template, "{{plugins}}",
+                                  options.presenter ? "RevealNotes" : "");
 
   fwrite(template, strlen(template), 1, output);
   fclose(output);
@@ -308,9 +316,13 @@ int main(int argc, char *argv[]) {
   
   for (int p = 0; p <= pages; p++) {
     free(info[p].slide);
+    if (options.nonotes == 0) {
+      free(info[p].annotations);
+    }
   }
   free(template);
   free(slide_data);
+  free(annot_data);
 
   return 0;
 }
