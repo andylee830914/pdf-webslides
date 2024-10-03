@@ -23,8 +23,9 @@ Then, open the slides in a browser and press the `s` key. This will open a new w
 ### Notes
 
 The tool supports the showing notes in presenter mode. Hence, they can also be directly embedded in LaTeX beamer.
-With the following macro
+With the following macro and `pdfcomment` package,
 
+    \usepackage{pdfcomment}
     \newcommand<>{\pnote}[1]{\only#2{\tikz[remember picture,overlay]{\node{\pdfmargincomment[opacity=0]{#1}}}}}
 
 notes can be added to a certain animation-step of a slide by adding something like
